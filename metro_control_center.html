@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>METROPOLITAN METRO CONTROL CENTER</title>
+<style>
+:root{
+  --bg:#050b12; --panel:#08131d; --panel2:#0b1823; --cyan:#00e5ff;
+  --green:#35ff9a; --yellow:#ffd84d; --red:#ff466d; --blue:#4f9cff;
+  --text:#d9f7ff; --muted:#6e9aaa; --line:rgba(0,229,255,.22);
+}
+*{box-sizing:border-box}
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(--text);font-family:"Segoe UI","Microsoft JhengHei",monospace}
+body:before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.16;
+background-image:linear-gradient(rgba(0,229,255,.08) 1px,transparent 1px),linear-gradient(90deg,rgba(0,229,255,.08) 1px,transparent 1px);
+background-size:36px 36px}
+body:after{content:"";position:fixed;inset:0;pointer-events:none;
+background:repeating-linear-gradient(0deg,transparent 0,transparent 3px,rgba(255,255,255,.018) 4px);mix-blend-mode:screen}
+.dashboard{height:100vh;padding:12px;display:grid;grid-template-rows:64px 1fr 34px;gap:10px}
+header,.panel,footer{background:linear-gradient(145deg,rgba(9,24,35,.96),rgba(4,12,19,.96));border:1px solid var(--line);box-shadow:0 0 22px rgba(0,229,255,.07),inset 0 0 22px rgba(0,229,255,.025)}
+header{display:flex;align-items:center;justify-content:space-between;padding:10px 18px;position:relative;overflow:hidden}
+header:before,.panel:before{content:"";position:absolute;inset:0;pointer-events:none;border:1px solid rgba(255,255,255,.025)}
+.brand{display:flex;align-items:center;gap:14px}
+.logo{width:40px;height:40px;border:1px solid var(--cyan);display:grid;place-items:center;color:var(--cyan);font-size:20px;box-shadow:0 0 16px rgba(0,229,255,.25)}
+.title{font-size:20px;font-weight:800;letter-spacing:3px}
+.subtitle{font-size:9px;color:var(--muted);letter-spacing:2px;margin-top:3px}
+.headerRight{display:flex;gap:22px;align-items:center;text-align:right}
+.live{font-size:10px;color:var(--green);letter-spacing:2px}
+.dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:currentColor;box-shadow:0 0 10px currentColor;animation:pulse 1.2s infinite}
+.clock{font-size:18px;letter-spacing:2px}
+.date{font-size:9px;color:var(--muted)}
+.main{min-height:0;display:grid;grid-template-columns:1.05fr 2.25fr 1.05fr;grid-template-rows:1.15fr .85fr;gap:10px}
+.panel{position:relative;min-width:0;min-height:0;overflow:hidden;padding:13px}
+.panelTitle{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;font-size:11px;letter-spacing:2px;color:var(--cyan);font-weight:700}
+.panelTitle span:last-child{font-size:8px;color:var(--muted)}
+.trainPanel{grid-column:1;grid-row:1}
+.mapPanel{grid-column:2;grid-row:1}
+.alertPanel{grid-column:3;grid-row:1}
+.dataPanel{grid-column:1;grid-row:2}
+.chartPanel{grid-column:2;grid-row:2}
+.systemPanel{grid-column:3;grid-row:2}
+.trainList{display:grid;gap:7px}
+.train{display:grid;grid-template-columns:46px 1fr auto;gap:7px;align-items:center;padding:8px;border-left:2px solid var(--green);background:rgba(53,255,154,.025)}
+.train.delay{border-color:var(--yellow)}
+.train.alert{border-color:var(--red)}
+.trainId{font-size:11px;font-weight:800}
+.trainLine{font-size:8px;color:var(--muted)}
+.status{font-size:8px;letter-spacing:1px;color:var(--green)}
+.delay .status{color:var(--yellow)} .alert .status{color:var(--red)}
+.progress{height:3px;background:#10232d;margin-top:5px;overflow:hidden}
+.progress i{display:block;height:100%;width:76%;background:currentColor;box-shadow:0 0 7px currentColor}
+.mapWrap{height:calc(100% - 30px);position:relative;display:grid;place-items:center}
+.metroMap{width:96%;height:80%;position:relative}
+.line{position:absolute;height:4px;border-radius:4px;box-shadow:0 0 10px currentColor}
+.line.a{color:var(--cyan);background:currentColor;left:4%;right:4%;top:42%}
+.line.b{color:var(--blue);background:currentColor;left:17%;width:66%;top:42%;transform:rotate(28deg);transform-origin:center}
+.line.c{color:var(--green);background:currentColor;left:17%;width:66%;top:42%;transform:rotate(-28deg);transform-origin:center}
+.station{position:absolute;width:11px;height:11px;border:2px solid currentColor;background:var(--bg);border-radius:50%;box-shadow:0 0 9px currentColor;z-index:2}
+.station label{position:absolute;white-space:nowrap;font-size:7px;color:var(--muted);top:13px;left:50%;transform:translateX(-50%)}
+.s1{left:5%;top:39%;color:var(--cyan)} .s2{left:22%;top:39%;color:var(--cyan)}
+.s3{left:39%;top:39%;color:var(--cyan)} .s4{left:57%;top:39%;color:var(--cyan)}
+.s5{left:75%;top:39%;color:var(--cyan)} .s6{left:92%;top:39%;color:var(--cyan)}
+.s7{left:20%;top:15%;color:var(--blue)} .s8{left:80%;top:67%;color:var(--green)}
+.metroTrain{position:absolute;top:calc(42% - 7px);left:5%;font-size:17px;filter:drop-shadow(0 0 7px var(--cyan));animation:trainMove 8s linear infinite;z-index:4}
+.metroTrain.t2{animation-delay:-3s;font-size:14px;color:var(--blue);filter:drop-shadow(0 0 7px var(--blue))}
+.legend{position:absolute;bottom:0;left:0;display:flex;gap:14px;font-size:7px;color:var(--muted)}
+.legend b{color:var(--cyan)} .legend .b{color:var(--blue)} .legend .g{color:var(--green)}
+.alertBox{padding:10px;margin-bottom:8px;border:1px solid rgba(255,216,77,.3);background:rgba(255,216,77,.035);animation:alertPulse 2s infinite}
+.alertBox.red{border-color:rgba(255,70,109,.4);background:rgba(255,70,109,.04)}
+.alertHead{display:flex;justify-content:space-between;color:var(--yellow);font-size:9px;font-weight:800}
+.red .alertHead{color:var(--red)}
+.alertText{font-size:8px;color:var(--text);margin-top:6px;line-height:1.5}
+.alertTime{font-size:7px;color:var(--muted);margin-top:5px}
+.metrics{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.metric{padding:9px;border:1px solid rgba(0,229,255,.14);background:rgba(0,229,255,.025)}
+.metric small{display:block;color:var(--muted);font-size:7px;letter-spacing:1px}
+.metric strong{display:block;font-size:19px;margin-top:4px;color:var(--cyan);letter-spacing:1px}
+.metric em{font-size:7px;color:var(--green);font-style:normal}
+.chart{height:calc(100% - 28px);position:relative;border-left:1px solid rgba(0,229,255,.16);border-bottom:1px solid rgba(0,229,255,.16);overflow:hidden}
+.gridLines{position:absolute;inset:0;background-image:linear-gradient(rgba(0,229,255,.08) 1px,transparent 1px),linear-gradient(90deg,rgba(0,229,255,.05) 1px,transparent 1px);background-size:10% 25%}
+svg{position:absolute;inset:4px;width:100%;height:calc(100% - 8px)}
+.chartLine{fill:none;stroke:var(--cyan);stroke-width:2;filter:drop-shadow(0 0 5px rgba(0,229,255,.8));stroke-dasharray:500;animation:dash 4s linear infinite}
+.chartArea{fill:rgba(0,229,255,.06)}
+.chartValue{position:absolute;right:8px;top:5px;color:var(--cyan);font-size:8px}
+.sysList{display:grid;gap:9px}
+.sys{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center}
+.sysName{font-size:8px;letter-spacing:1px}.sysVal{font-size:8px;color:var(--green)}
+.bar{grid-column:1/-1;height:4px;background:#10232d}.bar i{display:block;height:100%;background:var(--green);box-shadow:0 0 7px var(--green);transition:width .7s}
+footer{display:flex;align-items:center;gap:18px;padding:0 12px;font-size:8px;letter-spacing:1px;overflow:hidden;white-space:nowrap}
+.ticker{animation:ticker 20s linear infinite}
+footer .liveData{margin-left:auto;color:var(--green)}
+footer .liveData .dot{margin-right:5px}
+.scan{position:absolute;top:-10%;left:0;width:100%;height:2px;background:linear-gradient(90deg,transparent,var(--cyan),transparent);opacity:.28;animation:scan 5s linear infinite;pointer-events:none}
+@keyframes pulse{50%{opacity:.35;transform:scale(.8)}}
+@keyframes alertPulse{50%{box-shadow:inset 0 0 18px rgba(255,216,77,.04)}}
+@keyframes trainMove{0%{left:4%}50%{left:48%}100%{left:91%}}
+@keyframes dash{to{stroke-dashoffset:-500}}
+@keyframes scan{0%{top:-5%}100%{top:105%}}
+@keyframes ticker{from{transform:translateX(100%)}to{transform:translateX(-100%)}}
+@media(max-width:900px){.title{font-size:14px}.main{grid-template-columns:1fr 1.8fr 1fr}.panel{padding:9px}.metric strong{font-size:15px}}
+</style>
+</head>
+<body>
+<div class="dashboard">
+<header>
+  <div class="brand">
+    <div class="logo">M</div>
+    <div><div class="title">METROPOLITAN METRO CONTROL CENTER</div><div class="subtitle">CENTRALIZED TRAIN OPERATIONS · REAL-TIME NETWORK COMMAND · CINEMATIC SIMULATION</div></div>
+  </div>
+  <div class="headerRight">
+    <div><div class="live"><span class="dot"></span> SYSTEM ONLINE</div><div class="date" id="date">2026.09.17</div></div>
+    <div class="clock" id="clock">11:37:00</div>
+  </div>
+</header>
+
+<main class="main">
+<section class="panel trainPanel">
+<div class="scan"></div>
+<div class="panelTitle">🚇 TRAIN MONITOR <span>LIVE FLEET</span></div>
+<div class="trainList">
+  <div class="train"><div class="trainId">T-101</div><div><div class="trainLine">LINE 01 · CENTRAL</div><div class="progress"><i style="width:84%"></i></div></div><div class="status">● RUN</div></div>
+  <div class="train"><div class="trainId">T-204</div><div><div class="trainLine">LINE 02 · EAST</div><div class="progress"><i style="width:67%"></i></div></div><div class="status">● RUN</div></div>
+  <div class="train delay"><div class="trainId">T-203</div><div><div class="trainLine">LINE 01 · NORTH</div><div class="progress"><i style="width:42%"></i></div></div><div class="status">● DELAY</div></div>
+  <div class="train"><div class="trainId">T-118</div><div><div class="trainLine">LINE 03 · AIRPORT</div><div class="progress"><i style="width:91%"></i></div></div><div class="status">● RUN</div></div>
+  <div class="train alert"><div class="trainId">T-307</div><div><div class="trainLine">LINE 02 · WEST</div><div class="progress"><i style="width:58%"></i></div></div><div class="status">● CHECK</div></div>
+</div>
+</section>
+
+<section class="panel mapPanel">
+<div class="scan"></div>
+<div class="panelTitle">🗺 NETWORK MAP <span>6 STATIONS · 3 LINES</span></div>
+<div class="mapWrap">
+<div class="metroMap">
+ <div class="line a"></div><div class="line b"></div><div class="line c"></div>
+ <div class="station s1"><label>NORTH</label></div><div class="station s2"><label>RIVER</label></div>
+ <div class="station s3"><label>CENTRAL</label></div><div class="station s4"><label>CITY HALL</label></div>
+ <div class="station s5"><label>EAST</label></div><div class="station s6"><label>AIRPORT</label></div>
+ <div class="station s7"><label>WEST</label></div>
+ <div class="station s8"><label>PORT</label></div>
+ <div class="metroTrain">🚇</div><div class="metroTrain t2">◆</div>
+</div>
+<div class="legend"><span><b>●</b> LINE 01</span><span><b class="b">●</b> LINE 02</span><span><b class="g">●</b> LINE 03</span><span>◆ LIVE TRAIN</span></div>
+</div>
+</section>
+
+<section class="panel alertPanel">
+<div class="panelTitle">⚠ ALERT CENTER <span id="alertCount">03 ACTIVE</span></div>
+<div class="alertBox red"><div class="alertHead"><span>⚠ SIGNAL WARNING</span><span>HIGH</span></div><div class="alertText">T-203 response delay detected at NORTH sector.</div><div class="alertTime">EVENT ID: SIG-2048 · <span class="ago">00:18</span></div></div>
+<div class="alertBox"><div class="alertHead"><span>⚠ PASSENGER FLOW</span><span>MED</span></div><div class="alertText">Central Station occupancy approaching 92%.</div><div class="alertTime">EVENT ID: PAX-7712 · <span class="ago">01:42</span></div></div>
+<div class="alertBox"><div class="alertHead"><span>✓ SYSTEM CHECK</span><span>INFO</span></div><div class="alertText">CCTV network synchronization completed.</div><div class="alertTime">EVENT ID: SYS-5530 · <span class="ago">03:07</span></div></div>
+</section>
+
+<section class="panel dataPanel">
+<div class="panelTitle">📊 LIVE DATA <span>AUTO REFRESH</span></div>
+<div class="metrics">
+ <div class="metric"><small>PASSENGERS</small><strong id="passengers">128,492</strong><em>▲ LIVE</em></div>
+ <div class="metric"><small>ACTIVE TRAINS</small><strong id="trains">342</strong><em>● RUNNING</em></div>
+ <div class="metric"><small>ON-TIME RATE</small><strong id="ontime">97.8%</strong><em>▲ +0.3%</em></div>
+ <div class="metric"><small>NETWORK LOAD</small><strong id="load">68%</strong><em>● NOMINAL</em></div>
+</div>
+</section>
+
+<section class="panel chartPanel">
+<div class="panelTitle">📈 PASSENGER FLOW <span>LAST 60 MIN</span></div>
+<div class="chart"><div class="gridLines"></div><div class="chartValue" id="chartValue">42.7K PAX/H</div>
+<svg viewBox="0 0 500 170" preserveAspectRatio="none">
+<path class="chartArea" d="M0 145 L25 125 L50 132 L75 98 L100 112 L125 75 L150 92 L175 58 L200 82 L225 65 L250 72 L275 40 L300 55 L325 31 L350 50 L375 35 L400 63 L425 45 L450 69 L475 52 L500 60 L500 170 L0 170 Z"/>
+<path class="chartLine" d="M0 145 L25 125 L50 132 L75 98 L100 112 L125 75 L150 92 L175 58 L200 82 L225 65 L250 72 L275 40 L300 55 L325 31 L350 50 L375 35 L400 63 L425 45 L450 69 L475 52 L500 60"/>
+</svg></div>
+</section>
+
+<section class="panel systemPanel">
+<div class="panelTitle">🛰 SYSTEM MONITOR <span>HEALTH 99.9%</span></div>
+<div class="sysList">
+ <div class="sys"><div class="sysName">SIGNAL CONTROL</div><div class="sysVal">● ONLINE</div><div class="bar"><i style="width:99%"></i></div></div>
+ <div class="sys"><div class="sysName">POWER GRID</div><div class="sysVal">● ONLINE</div><div class="bar"><i style="width:97%"></i></div></div>
+ <div class="sys"><div class="sysName">CCTV NETWORK</div><div class="sysVal">● ONLINE</div><div class="bar"><i style="width:94%"></i></div></div>
+ <div class="sys"><div class="sysName">COMMUNICATION</div><div class="sysVal">● ONLINE</div><div class="bar"><i style="width:98%"></i></div></div>
+ <div class="sys"><div class="sysName">AI CONTROL</div><div class="sysVal">● ACTIVE</div><div class="bar"><i style="width:89%"></i></div></div>
+</div>
+</section>
+</main>
+
+<footer>
+ <span class="ticker">SYSTEM MESSAGE >> ALL LINES OPERATING >> TRAIN T-204 DEPARTED >> T-203 SIGNAL DELAY UNDER INVESTIGATION >> CENTRAL STATION PASSENGER FLOW NOMINAL >> NEXT NETWORK UPDATE 05 SEC >> DATA STREAM LIVE >> </span>
+ <span class="liveData"><span class="dot"></span>DATA STREAM LIVE</span>
+</footer>
+</div>
+
+<script>
+const $=id=>document.getElementById(id);
+function updateClock(){
+  const d=new Date();
+  $("clock").textContent=d.toLocaleTimeString("en-GB",{hour12:false});
+  $("date").textContent=d.getFullYear()+"."+String(d.getMonth()+1).padStart(2,"0")+"."+String(d.getDate()).padStart(2,"0");
+}
+function rand(min,max){return Math.random()*(max-min)+min}
+function updateData(){
+  const p=128000+Math.floor(Math.random()*1300);
+  $("passengers").textContent=p.toLocaleString();
+  $("trains").textContent=338+Math.floor(Math.random()*10);
+  $("ontime").textContent=(97.2+Math.random()*1.0).toFixed(1)+"%";
+  $("load").textContent=Math.floor(61+Math.random()*18)+"%";
+  $("chartValue").textContent=(39+Math.random()*8).toFixed(1)+"K PAX/H";
+  document.querySelectorAll(".progress i").forEach(x=>x.style.width=Math.floor(35+Math.random()*60)+"%");
+  document.querySelectorAll(".bar i").forEach(x=>x.style.width=Math.floor(88+Math.random()*11)+"%");
+}
+let seconds=[18,102,187];
+function updateAlerts(){
+  seconds=seconds.map(x=>x+1);
+  document.querySelectorAll(".ago").forEach((el,i)=>{
+    const s=seconds[i],m=Math.floor(s/60),r=s%60;
+    el.textContent=String(m).padStart(2,"0")+":"+String(r).padStart(2,"0");
+  });
+}
+setInterval(updateClock,1000); setInterval(updateData,1800); setInterval(updateAlerts,1000);
+updateClock(); updateData();
+</script>
+</body>
+</html>
