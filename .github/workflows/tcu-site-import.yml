@@ -2,7 +2,7 @@ name: Import verified TCU website
 on:
   push:
     branches: [main]
-    paths: ['.github/tcu-site-release.xz']
+    paths: ['.github/tcu-release-ready.json']
   workflow_dispatch:
 permissions:
   contents: write
@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-      - name: Expand and commit the verified website
+      - name: Verify and commit department website
         env:
           GH_TOKEN: ${{ github.token }}
           REPOSITORY: ${{ github.repository }}
@@ -22,8 +22,7 @@ jobs:
         shell: python
         run: |
           import os, json, base64, lzma, hashlib, urllib.request
-          repo = os.environ['REPOSITORY']
-          prefix = 'https://api.github.com/repos/' + repo
+          prefix = 'https://api.github.com/repos/' + os.environ['REPOSITORY']
           def api(path, data=None, method='GET'):
               body = None if data is None else json.dumps(data).encode()
               req = urllib.request.Request(prefix + path, data=body, method=method)
@@ -34,26 +33,40 @@ jobs:
                   req.add_header('Content-Type', 'application/json')
               with urllib.request.urlopen(req, timeout=60) as response:
                   return json.load(response)
-          source = api('/contents/.github/tcu-site-release.xz?ref=' + os.environ['SOURCE_COMMIT'])
-          release = json.loads(lzma.decompress(base64.b64decode(source['content'])))
+          def read(path):
+              result = api('/contents/' + path + '?ref=' + os.environ['SOURCE_COMMIT'])
+              return base64.b64decode(result['content'])
+          manifest = json.loads(read('.github/tcu-release-ready.json'))
+          parts = []
+          for part in manifest['parts']:
+              if not part['path'].startswith('.github/tcu-release-parts/'):
+                  raise ValueError('Unexpected part path')
+              data = read(part['path']).strip()
+              if hashlib.sha256(data).hexdigest() != part['sha256']:
+                  raise ValueError('Part checksum mismatch: ' + part['path'])
+              parts.append(data)
+          compressed = base64.b64decode(b''.join(parts), validate=True)
+          if hashlib.sha256(compressed).hexdigest() != manifest['sha256']:
+              raise ValueError('Release checksum mismatch')
+          release = json.loads(lzma.decompress(compressed))
           allowed = {'index.html','studentworks.html','ai-collaboration.html','404.html','AI-COLLABORATION-FULL.txt','README.md','GITHUB-PAGES.md','SUBMISSION-CHECKLIST.md','TESTING.md','TEST-RESULTS.json','PUBLISH-STATUS.json','SOURCES.md','robots.txt','sitemap.xml','.nojekyll'}
           entries = []
           for item in release['files']:
               path = item['path']
-              if path not in allowed and not (path.startswith('graph/') and '/' not in path[6:]):
+              if path not in allowed and not (path.startswith('graph/') and '/' not in path[6:] and '..' not in path):
                   raise ValueError('Unexpected release path: ' + path)
               data = base64.b64decode(item['content']) if item['encoding']=='base64' else item['content'].encode('utf-8')
               if hashlib.sha256(data).hexdigest() != item['sha256']:
-                  raise ValueError('Checksum mismatch: ' + path)
+                  raise ValueError('File checksum mismatch: ' + path)
               blob = api('/git/blobs', {'encoding':'base64','content':base64.b64encode(data).decode()}, 'POST')
               entries.append({'path':path,'mode':'100644','type':'blob','sha':blob['sha']})
           head = api('/git/ref/heads/main')['object']['sha']
           previous = api('/git/commits/' + head)
           tree = api('/git/trees', {'base_tree':previous['tree']['sha'],'tree':entries}, 'POST')
-          commit = api('/git/commits', {'message':'Publish complete academic-style TCU website and nine-prompt record','tree':tree['sha'],'parents':[head]}, 'POST')
+          commit = api('/git/commits', {'message':'Publish verified academic-style TCU site with all media and nine-prompt record','tree':tree['sha'],'parents':[head]}, 'POST')
           api('/git/refs/heads/main', {'sha':commit['sha'],'force':False}, 'PATCH')
           print('Imported files:', len(entries))
           print('Website commit:', commit['sha'])
           with open(os.environ['GITHUB_STEP_SUMMARY'], 'a') as summary:
-              summary.write('Imported the checked department website to main. Existing unrelated files are preserved.\n')
-              summary.write('A subsequent user-authenticated commit must trigger branch-based GitHub Pages publishing.\n')
+              summary.write('Imported the verified department website to main. Unrelated existing files were preserved.\n')
+              summary.write('A user-authenticated follow-up commit must trigger branch-based GitHub Pages publishing.\n')
