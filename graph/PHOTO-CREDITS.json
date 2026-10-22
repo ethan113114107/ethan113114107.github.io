@@ -1,0 +1,46 @@
+[
+  {
+    "file": "graph/tcu-campus.jpg",
+    "title": "慈濟大學校園建築",
+    "context": "2014 年歷史實拍；非目前經管系館照片。",
+    "author": "Cerevisae",
+    "source": "https://commons.wikimedia.org/wiki/File:The_Buddist_Tzu_Chi_University.JPG",
+    "license": "CC BY-SA 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "date": "2014-11-19 08:17:24",
+    "changes": "照片檔沿用來源縮圖；網頁以 CSS 裁切。照片剪輯片有縮放與編排；CC BY-SA 素材及其改作依相同授權提供。"
+  },
+  {
+    "file": "graph/tcu-library.jpg",
+    "title": "慈濟大學圖書館入口",
+    "context": "2014 年歷史實拍；非本系專屬教室。",
+    "author": "Cerevisae",
+    "source": "https://commons.wikimedia.org/wiki/File:The_library_of_Tzu_Chi_University.JPG",
+    "license": "CC BY-SA 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "date": "2014-11-19 08:29:51",
+    "changes": "照片檔沿用來源縮圖；網頁以 CSS 裁切。照片剪輯片有縮放與編排；CC BY-SA 素材及其改作依相同授權提供。"
+  },
+  {
+    "file": "graph/digital-learning.jpg",
+    "title": "數位學習情境",
+    "context": "授權情境攝影；非本系課堂或研究系統畫面。",
+    "author": "www.Pixel.la Free Stock Photos",
+    "source": "https://commons.wikimedia.org/wiki/File:Desk-laptop-working-technology_(24299511976).jpg",
+    "license": "CC0",
+    "license_url": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+    "date": "2014-10-06 10:08",
+    "changes": "照片檔沿用來源縮圖；網頁以 CSS 裁切。照片剪輯片有縮放與編排；CC BY-SA 素材及其改作依相同授權提供。"
+  },
+  {
+    "file": "graph/circular-nature.jpg",
+    "title": "黑水虻主題攝影",
+    "context": "黑水虻成蟲自然攝影；非該團隊的幼蟲材料或研究現場。",
+    "author": "Didier Descouens",
+    "source": "https://commons.wikimedia.org/wiki/File:Hermetia_illucens_MHNT_Fronton.jpg",
+    "license": "CC BY-SA 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "date": "23 October 2013",
+    "changes": "照片檔沿用來源縮圖；網頁以 CSS 裁切。照片剪輯片有縮放與編排；CC BY-SA 素材及其改作依相同授權提供。"
+  }
+]
