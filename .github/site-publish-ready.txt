@@ -1,0 +1,5 @@
+Release: tcu-public-photo-20261022
+Build source: .github/scripts/build_department_site.py
+Prompt record: AI-COLLABORATION-FULL.txt (12 actual user prompts)
+Photo source: the attributed tcu-photo-assets artifact from workflow run 39718144101 in this repository.
+The output is to be checked on this design branch before publication to main. Unrelated existing files must be preserved.

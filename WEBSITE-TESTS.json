@@ -1,0 +1,19 @@
+{
+  "version": "tcu-public-photo-20261022",
+  "html_pages": [
+    "index.html",
+    "studentworks.html",
+    "ai-collaboration.html",
+    "photo-credits.html",
+    "404.html"
+  ],
+  "relative_links_checked": 102,
+  "errors": [],
+  "prompt_count": 12,
+  "video_seconds": 16.0,
+  "video_width": 960,
+  "video_height": 540,
+  "all_images_and_video_in_graph": true,
+  "public_http_verification": "Separate deployment check required.",
+  "visual_browser_test": "Not performed by this build script."
+}

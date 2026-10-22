@@ -1,0 +1,58 @@
+name: Verify public department website
+on:
+  push:
+    branches: [main]
+    paths:
+      - index.html
+      - studentworks.html
+      - ai-collaboration.html
+      - photo-credits.html
+      - graph/**
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 9
+    steps:
+      - name: Check live Pages responses without authentication
+        shell: python
+        run: |
+          import json, time, datetime, urllib.request
+          base = 'https://ethan113114107.github.io/'
+          version = b'tcu-public-photo-20261022'
+          def read(path):
+              req = urllib.request.Request(base + path, headers={'User-Agent':'TCUWebsiteDeploymentCheck/1.0','Cache-Control':'no-cache'})
+              with urllib.request.urlopen(req, timeout=20) as r:
+                  return {'url':r.url,'status':r.status,'content_type':r.headers.get('Content-Type','')}, r.read()
+          for attempt in range(40):
+              try:
+                  meta, body = read('')
+                  if meta['status'] == 200 and version in body:
+                      break
+              except Exception as error:
+                  print('Awaiting Pages publication:',type(error).__name__)
+              time.sleep(10)
+          else:
+              raise RuntimeError('New website was not publicly served within this deployment check.')
+          paths = ['', 'index.html','studentworks.html','ai-collaboration.html','photo-credits.html','AI-COLLABORATION-FULL.txt','graph/tcu-campus.jpg','graph/tcu-library.jpg','graph/digital-learning.jpg','graph/circular-nature.jpg','graph/work-sort.svg','graph/learning-intro.mp4']
+          results=[]
+          for path in paths:
+              meta, body = read(path)
+              assert meta['status'] == 200, (path,meta)
+              if not path or path.endswith('.html'):
+                  assert version in body, path + ' did not contain the new site version.'
+              if path.endswith('.jpg'):
+                  assert body.startswith(bytes([255,216,255])), path + ' is not a JPEG.'
+              if path.endswith('.mp4'):
+                  assert b'ftyp' in body[:32], path + ' is not an MP4.'
+              meta['bytes']=len(body); results.append(meta)
+              print(meta['status'],meta['url'],len(body))
+          report={'checked_at':datetime.datetime.now(datetime.timezone.utc).isoformat(),'version':version.decode(),'unauthenticated':True,'results':results}
+          with open('PUBLIC-VERIFICATION.json','w') as f:
+              json.dump(report,f,indent=2)
+      - uses: actions/upload-artifact@v4
+        with:
+          name: tcu-public-verification
+          path: PUBLIC-VERIFICATION.json
+          retention-days: 7
