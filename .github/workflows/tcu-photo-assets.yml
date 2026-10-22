@@ -1,0 +1,64 @@
+name: Prepare attributed TCU photo assets
+on:
+  push:
+    branches: ['site/real-photo-assets-20261022']
+    paths: ['.github/workflows/tcu-photo-assets.yml']
+permissions:
+  contents: read
+jobs:
+  photos:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Collect photos and original license metadata
+        shell: python
+        run: |
+          import json, pathlib, urllib.parse, urllib.request, time
+          out = pathlib.Path('photo-assets'); out.mkdir()
+          records=[]
+          ua='TCUStudentWebsitePhotoPreparation/1.0 (educational website; attribution retained)'
+          def get(url):
+              req=urllib.request.Request(url,headers={'User-Agent':ua})
+              with urllib.request.urlopen(req,timeout=22) as r:
+                  return r.read()
+          def query(params):
+              base={'action':'query','format':'json','prop':'imageinfo','iiprop':'url|extmetadata','iiurlwidth':1600}
+              base.update(params)
+              return json.loads(get('https://commons.wikimedia.org/w/api.php?'+urllib.parse.urlencode(base)))
+          groups=[('campus',{'titles':'File:The Buddist Tzu Chi University.JPG|File:The library of Tzu Chi University.JPG'}),('study',{'generator':'search','gsrsearch':'laptop desk filetype:bitmap','gsrnamespace':6,'gsrlimit':3}),('circular',{'generator':'search','gsrsearch':'black soldier fly larvae filetype:bitmap','gsrnamespace':6,'gsrlimit':2})]
+          for group,params in groups:
+              try:
+                  result=query(params)
+                  (out/(group+'-metadata.json')).write_text(json.dumps(result,ensure_ascii=False,indent=2))
+                  for idx,page in enumerate(result.get('query',{}).get('pages',{}).values()):
+                      info=page.get('imageinfo',[{}])[0]; meta=info.get('extmetadata',{})
+                      license=meta.get('LicenseShortName',{}).get('value','')
+                      if not any(k in license.lower() for k in ['cc by','cc0','public domain']):
+                          continue
+                      url=info.get('thumburl',info.get('url'))
+                      if not url: continue
+                      ext='.png' if '.png' in url.lower().split('?')[0] else '.jpg'
+                      name=group+'-'+str(idx)+ext
+                      try:
+                          data=get(url)
+                          (out/name).write_bytes(data)
+                          records.append({'file':name,'title':page['title'],'url':url,'original':info.get('url'),'descriptionurl':info.get('descriptionurl'),'metadata':meta})
+                          print(name,license,len(data))
+                      except Exception as e: print('Image download:',str(e))
+                      time.sleep(1)
+              except Exception as e: print(group,str(e))
+          official=[('tcu-cafe.png','https://hm.tcu.edu.tw/var/file/19/1019/img/1287/en-image008.png'),('tcu-campus-official.jpg','https://www.tcu.edu.tw/var/file/33/1033/img/b6.jpg')]
+          for name,url in official:
+              try:
+                  data=get(url)
+                  (out/name).write_bytes(data)
+                  records.append({'file':name,'url':url,'note':'Official university source; no reuse license asserted. Review before use.'})
+                  print(name,len(data))
+              except Exception as e: print(name,str(e))
+          (out/'photo-manifest.json').write_text(json.dumps(records,ensure_ascii=False,indent=2))
+      - uses: actions/upload-artifact@v4
+        with:
+          name: tcu-photo-assets
+          path: photo-assets/
+          retention-days: 3
+          if-no-files-found: error
