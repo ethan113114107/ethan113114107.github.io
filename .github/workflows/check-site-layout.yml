@@ -1,0 +1,83 @@
+name: Check department website layout
+on:
+  push:
+    branches: ['site/real-photo-assets-20261022']
+    paths: ['.github/workflows/check-site-layout.yml']
+permissions:
+  contents: read
+jobs:
+  browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: site/real-photo-assets-20261022
+      - name: Install browser test dependency
+        run: python -m pip install playwright
+      - name: Test the generated local website with the installed browser
+        shell: python
+        run: |
+          from pathlib import Path
+          import json, shutil
+          from playwright.sync_api import sync_playwright
+          root=Path.cwd();out=root/'browser-check';out.mkdir()
+          report={'pages':[],'interactions':{},'errors':[]}
+          executable=shutil.which('google-chrome') or shutil.which('chromium')
+          assert executable, 'A browser executable is required for this test.'
+          with sync_playwright() as p:
+              browser=p.chromium.launch(executable_path=executable,headless=True)
+              for width in (1440,820,390,320):
+                  page=browser.new_page(viewport={'width':width,'height':1000})
+                  errors=[]
+                  page.on('pageerror',lambda e:errors.append(str(e)))
+                  for name in ('index.html','studentworks.html','ai-collaboration.html','photo-credits.html'):
+                      page.goto((root/name).as_uri(),wait_until='networkidle')
+                      for image in page.locator('img').all():
+                          image.scroll_into_view_if_needed()
+                      page.wait_for_timeout(100)
+                      page.evaluate('scrollTo(0,0)')
+                      row={'page':name,'width':width,'no_horizontal_overflow':page.evaluate('document.documentElement.scrollWidth<=innerWidth'),'broken_images':page.evaluate('[...document.images].filter(x=>!x.complete||!x.naturalWidth).map(x=>x.src)'),'script_errors':list(errors)}
+                      report['pages'].append(row)
+                      if width in (1440,390) and name in ('index.html','studentworks.html'):
+                          page.screenshot(path=str(out/(name[:-5]+'-'+str(width)+'.png')),full_page=False)
+                  page.close()
+              page=browser.new_page(viewport={'width':390,'height':850})
+              page.goto((root/'index.html').as_uri(),wait_until='networkidle')
+              page.locator('.menu').click()
+              report['interactions']['mobile_menu']=page.locator('#nav').is_visible()
+              page.locator('#nav a[href="studentworks.html"]').click()
+              report['interactions']['cross_page']=page.url.endswith('/studentworks.html')
+              page.locator('[data-filter]').nth(1).click()
+              report['interactions']['category_filter']=page.locator('#projects .card:visible').count()==1
+              page.locator('[data-filter]').nth(0).click()
+              page.locator('#search').fill('AI')
+              report['interactions']['search']=page.locator('#projects .card:visible').count()>=1
+              page.locator('#search').fill('zzzz-no-such-project-51936')
+              report['interactions']['no_results']=page.locator('#empty').is_visible()
+              page.locator('#search').fill('')
+              page.locator('.card details summary').first.click()
+              report['interactions']['project_details']=page.locator('.card details').first.get_attribute('open') is not None
+              page.locator('video').scroll_into_view_if_needed()
+              page.wait_for_function('document.querySelector("video").readyState>=1',timeout=15000)
+              report['video']=page.locator('video').evaluate('(v)=>({duration:v.duration,width:v.videoWidth,height:v.videoHeight})')
+              page.locator('video').evaluate('(v)=>{v.muted=true;return v.play()}')
+              page.wait_for_timeout(500)
+              report['interactions']['video_plays']=page.locator('video').evaluate('(v)=>v.currentTime>0&&!v.paused')
+              page.goto((root/'ai-collaboration.html').as_uri(),wait_until='networkidle')
+              page.locator('#expand').click()
+              report['interactions']['all_twelve_prompts']=page.locator('.record details[open]').count()==12
+              page.locator('#collapse').click()
+              report['interactions']['collapse_prompts']=page.locator('.record details[open]').count()==0
+              browser.close()
+          (out/'BROWSER-QA.json').write_text(json.dumps(report,ensure_ascii=False,indent=2))
+          print(json.dumps(report,ensure_ascii=False,indent=2))
+          assert all(x['no_horizontal_overflow'] and not x['broken_images'] and not x['script_errors'] for x in report['pages'])
+          assert all(report['interactions'].values())
+          assert report['video']['duration']==16
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: tcu-site-browser-check
+          path: browser-check/
+          retention-days: 7
