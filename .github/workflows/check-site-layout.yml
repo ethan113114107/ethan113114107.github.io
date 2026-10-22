@@ -13,8 +13,11 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ref: site/real-photo-assets-20261022
-      - name: Install browser test dependency
-        run: python -m pip install playwright
+      - name: Install browser test dependency and Chinese fonts for screenshots
+        run: |
+          python -m pip install playwright
+          sudo apt-get update -qq
+          sudo apt-get install -y fonts-noto-cjk
       - name: Test the generated local website with the installed browser
         shell: python
         run: |
@@ -22,7 +25,7 @@ jobs:
           import json, shutil
           from playwright.sync_api import sync_playwright
           root=Path.cwd();out=root/'browser-check';out.mkdir()
-          report={'pages':[],'interactions':{},'errors':[]}
+          report={'pages':[],'interactions':{},'errors':[],'screenshot_fonts':'Noto CJK installed in test environment only'}
           executable=shutil.which('google-chrome') or shutil.which('chromium')
           assert executable, 'A browser executable is required for this test.'
           with sync_playwright() as p:
@@ -33,10 +36,11 @@ jobs:
                   page.on('pageerror',lambda e:errors.append(str(e)))
                   for name in ('index.html','studentworks.html','ai-collaboration.html','photo-credits.html'):
                       page.goto((root/name).as_uri(),wait_until='networkidle')
+                      page.evaluate('document.fonts.ready')
                       for image in page.locator('img').all():
                           image.scroll_into_view_if_needed()
                       page.wait_for_timeout(100)
-                      page.evaluate('scrollTo(0,0)')
+                      page.evaluate('scrollTo({top:0,behavior:"instant"})')
                       row={'page':name,'width':width,'no_horizontal_overflow':page.evaluate('document.documentElement.scrollWidth<=innerWidth'),'broken_images':page.evaluate('[...document.images].filter(x=>!x.complete||!x.naturalWidth).map(x=>x.src)'),'script_errors':list(errors)}
                       report['pages'].append(row)
                       if width in (1440,390) and name in ('index.html','studentworks.html'):
