@@ -1,0 +1,79 @@
+{
+  "checked_at": "2026-10-22T04:18:43.991231+00:00",
+  "version": "tcu-public-photo-20261022",
+  "unauthenticated": true,
+  "results": [
+    {
+      "url": "https://ethan113114107.github.io/",
+      "status": 200,
+      "content_type": "text/html; charset=utf-8",
+      "bytes": 23401
+    },
+    {
+      "url": "https://ethan113114107.github.io/index.html",
+      "status": 200,
+      "content_type": "text/html; charset=utf-8",
+      "bytes": 23401
+    },
+    {
+      "url": "https://ethan113114107.github.io/studentworks.html",
+      "status": 200,
+      "content_type": "text/html; charset=utf-8",
+      "bytes": 25725
+    },
+    {
+      "url": "https://ethan113114107.github.io/ai-collaboration.html",
+      "status": 200,
+      "content_type": "text/html; charset=utf-8",
+      "bytes": 32143
+    },
+    {
+      "url": "https://ethan113114107.github.io/photo-credits.html",
+      "status": 200,
+      "content_type": "text/html; charset=utf-8",
+      "bytes": 19324
+    },
+    {
+      "url": "https://ethan113114107.github.io/AI-COLLABORATION-FULL.txt",
+      "status": 200,
+      "content_type": "text/plain; charset=utf-8",
+      "bytes": 15571
+    },
+    {
+      "url": "https://ethan113114107.github.io/graph/tcu-campus.jpg",
+      "status": 200,
+      "content_type": "image/jpeg",
+      "bytes": 618551
+    },
+    {
+      "url": "https://ethan113114107.github.io/graph/tcu-library.jpg",
+      "status": 200,
+      "content_type": "image/jpeg",
+      "bytes": 378834
+    },
+    {
+      "url": "https://ethan113114107.github.io/graph/digital-learning.jpg",
+      "status": 200,
+      "content_type": "image/jpeg",
+      "bytes": 255109
+    },
+    {
+      "url": "https://ethan113114107.github.io/graph/circular-nature.jpg",
+      "status": 200,
+      "content_type": "image/jpeg",
+      "bytes": 522512
+    },
+    {
+      "url": "https://ethan113114107.github.io/graph/work-sort.svg",
+      "status": 200,
+      "content_type": "image/svg+xml",
+      "bytes": 503
+    },
+    {
+      "url": "https://ethan113114107.github.io/graph/learning-intro.mp4",
+      "status": 200,
+      "content_type": "video/mp4",
+      "bytes": 277163
+    }
+  ]
+}

@@ -1,0 +1,79 @@
+{
+  "record_type": "archival_provenance_summary",
+  "schema_version": 1,
+  "notice": "This file is an archival summary of selected GitHub metadata and local integrity checks, not an unmodified API response. PUBLIC-VERIFICATION.json and the original ZIP are preserved byte-for-byte.",
+  "archived_on": "2026-10-26",
+  "archive_timezone": "Asia/Taipei",
+  "repository": "ethan113114107/ethan113114107.github.io",
+  "repository_url": "https://github.com/ethan113114107/ethan113114107.github.io",
+  "repository_visibility_at_archive": "public",
+  "archive_directory": "docs/deployment-evidence/2026-10-22",
+  "archive_branch": "main",
+  "base_commit_before_archive": "473df5fee1ba9e75ae39379261fe1e6117db8889",
+  "base_tree_before_archive": "dc8fbe5dab9ade1a2d39ea791f1135a827a2ee06",
+  "website_url": "https://ethan113114107.github.io/",
+  "workflow_run": {
+    "id": 39721625719,
+    "name": "Verify public department website",
+    "url": "https://github.com/ethan113114107/ethan113114107.github.io/actions/runs/39721625719",
+    "api_url": "https://api.github.com/repos/ethan113114107/ethan113114107.github.io/actions/runs/39721625719",
+    "status": "completed",
+    "conclusion": "success",
+    "event": "push",
+    "run_attempt": 1,
+    "head_branch": "main",
+    "head_sha": "473df5fee1ba9e75ae39379261fe1e6117db8889",
+    "created_at": "2026-10-22T04:18:17Z",
+    "updated_at": "2026-10-22T04:18:47Z",
+    "workflow_source_url": "https://github.com/ethan113114107/ethan113114107.github.io/blob/473df5fee1ba9e75ae39379261fe1e6117db8889/.github/workflows/verify-public-site.yml"
+  },
+  "artifact": {
+    "id": 12401327383,
+    "name": "tcu-public-verification",
+    "size_in_bytes": 626,
+    "created_at": "2026-10-22T04:18:44Z",
+    "updated_at": "2026-10-22T04:18:44Z",
+    "expires_at": "2026-10-29T04:18:44Z",
+    "created_at_taipei": "2026-10-22T12:18:44+08:00",
+    "expires_at_taipei": "2026-10-29T12:18:44+08:00",
+    "retention_days_from_workflow": 7,
+    "expired_when_retrieved": false,
+    "digest": "sha256:0c6ae74b842997542d5baff0da3eae7ca9ab91ac771eadeffc0d2da94391dbd4",
+    "metadata_source_url": "https://api.github.com/repos/ethan113114107/ethan113114107.github.io/actions/runs/39721625719/artifacts",
+    "archive_download_api_url": "https://api.github.com/repos/ethan113114107/ethan113114107.github.io/actions/artifacts/12401327383/zip"
+  },
+  "original_report": {
+    "file": "PUBLIC-VERIFICATION.json",
+    "size_in_bytes": 2150,
+    "sha256": "59902aa10f70bf3e086b6c5f32e584777ffbd0dc25b0b0b401858c2bf0d9b54e",
+    "git_blob_sha1": "c8e2f07bfa9bb7d0427a3108f0ee43eb7369d8d4",
+    "checked_at": "2026-10-22T04:18:43.991231+00:00",
+    "checked_at_taipei": "2026-10-22T12:18:43.991231+08:00",
+    "version": "tcu-public-photo-20261022",
+    "unauthenticated": true,
+    "resource_count": 12,
+    "http_200_count": 12,
+    "reported_non_200_count": 0
+  },
+  "integrity_checks": {
+    "zip_file": "tcu-public-verification.original.zip",
+    "zip_sha256_matches_github_artifact_digest": true,
+    "zip_member_names": ["PUBLIC-VERIFICATION.json"],
+    "zip_crc_test_passed": true,
+    "json_parse_passed": true,
+    "json_preserved_without_reformatting": true
+  },
+  "scope": {
+    "historical_point_in_time_verification": true,
+    "continuous_monitoring": false,
+    "new_live_site_check_performed_during_archival": false,
+    "commit_association_source": "workflow_run.head_sha and artifact.workflow_run.head_sha; original JSON has no commit field",
+    "checked_at_meaning": "Report generation timestamp after all requests completed; no individual request timestamps are recorded.",
+    "limitations": [
+      "HTTP 200 and recorded media signatures do not establish full browser rendering, interaction correctness or playback correctness.",
+      "The historical results do not establish present or future uptime.",
+      "Archiving files does not change the original artifact expiration date or extend its retention period.",
+      "Repository copies remain available independently of artifact retention while the repository and its history are retained."
+    ]
+  }
+}
